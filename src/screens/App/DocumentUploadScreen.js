@@ -118,7 +118,7 @@ function DocumentUploadScreen({ route, navigation }) {
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
         <Icon name="upload" size={60} color="#007bff" style={styles.icon} />
-        <Text style={styles.title}>Upload Document for Audit Request #{auditRequestId}</Text>
+        <Text style={styles.title}>Upload Document for Audit Request :{auditRequestId}</Text>
         <Text style={styles.subtitle}>Attach relevant files to this audit request.</Text>
 
         <View style={styles.inputGroup}>
@@ -174,7 +174,7 @@ function DocumentUploadScreen({ route, navigation }) {
             <ActivityIndicator color="#fff" />
           ) : (
             <>
-              <Icon name="file-upload" size={20} color="#fff" style={styles.buttonIcon} />
+              <Icon name="" size={20} color="#fff" style={styles.buttonIcon} />
               <Text style={styles.buttonText}>Upload Document</Text>
             </>
           )}

@@ -7,7 +7,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // IMPORTANT: Replace with your Django backend's IP address or Render URL
 // If running locally on physical device: Use your machine's actual local IP (e.g., http://192.168.1.10:8000/api/)
 // If deploying to Render: Use your Render backend service URL (e.g., https://your-django-app.onrender.com/api/)
+//export const API_BASE_URL = 'https://meity-audit-v2-1.onrender.com/api/'; // Example: Replace with your actual IP or deployed URL
+//export const API_BASE_URL = 'http://192.168.29.64:8000/api/'; // Example: Replace with your actual IP or deployed URL
 export const API_BASE_URL = 'http://10.3.20.183:8000/api/'; // Example: Replace with your actual IP or deployed URL
+
 
 const api = axios.create({
   baseURL: API_BASE_URL,

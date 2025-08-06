@@ -48,10 +48,10 @@ function AppStackNavigator() {
         headerTitleStyle: { fontWeight: 'bold' },
       }}
     >
-      <AppStack.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'MeitY Audit Dashboard' }} />
-      <AppStack.Screen name="AuditRequestList" component={AuditRequestListScreen} options={{ title: 'Audit Requests' }} />
+      <AppStack.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Miety Cloud Empanelmet' }} />
+      <AppStack.Screen name="AuditRequestList" component={AuditRequestListScreen} options={{ title: 'Cloud Empanelment Requests' }} />
       <AppStack.Screen name="AuditRequestDetail" component={AuditRequestDetailScreen} options={{ title: 'Request Details' }} />
-      <AppStack.Screen name="CreateAuditRequest" component={CreateAuditRequestScreen} options={{ title: 'New Audit Request' }} />
+      <AppStack.Screen name="CreateAuditRequest" component={CreateAuditRequestScreen} options={{ title: 'New Empanelment Request' }} />
       <AppStack.Screen name="AddRemark" component={AddRemarkScreen} options={{ title: 'Add Remark' }} />
       <AppStack.Screen name="DocumentUpload" component={DocumentUploadScreen} options={{ title: 'Upload Document' }} />
       <AppStack.Screen name="UpdateStatus" component={UpdateStatusScreen} options={{ title: 'Update Status' }} />

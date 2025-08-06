@@ -42,7 +42,7 @@ function AuditRequestListScreen({ navigation }) {
       const response = await api.get('/audit-management/requests/');
       
       // --- START: Added/Modified Debugging Logs for Response Data ---
-      console.log('AuditRequestListScreen: Raw API response data:', response.data);
+      console.log('AuditRequestListScreen: Raw API response data: fetched', );
       let requests = [];
       if (Array.isArray(response.data)) {
         requests = response.data;
@@ -188,7 +188,7 @@ const renderRequestItem = ({ item, navigation }) => ( // Added navigation to pro
     onPress={() => navigation.navigate('AuditRequestDetail', { auditRequestId: item.id })}
   >
     <View style={styles.cardHeader}>
-      <Text style={styles.requestId}>Request ID: #{item.id}</Text>
+      <Text style={styles.requestId}>Request ID: {item.id}</Text>
       <Text style={[styles.statusBadge, styles[`status-${item.status}`]]}>
         {item.status_display}
       </Text>

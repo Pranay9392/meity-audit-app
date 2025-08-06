@@ -48,7 +48,7 @@ function DashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('CreateAuditRequest')}
             >
               <Icon name="plus-circle" size={40} color="#28a745" />
-              <Text style={styles.cardTitle}>New Audit Request</Text>
+              <Text style={styles.cardTitle}>New Request</Text>
               <Text style={styles.cardDescription}>Submit a new audit request for your cloud service.</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -56,8 +56,8 @@ function DashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('AuditRequestList')}
             >
               <Icon name="list-alt" size={40} color="#007bff" />
-              <Text style={styles.cardTitle}>My Audit Requests</Text>
-              <Text style={styles.cardDescription}>View and manage your submitted audit requests.</Text>
+              <Text style={styles.cardTitle}>Cloud Empanlement Requests</Text>
+              <Text style={styles.cardDescription}>View and manage your submitted requests.</Text>
             </TouchableOpacity>
           </>
         )}
@@ -67,9 +67,9 @@ function DashboardScreen({ navigation }) {
             style={styles.card}
             onPress={() => navigation.navigate('AuditRequestList')}
           >
-            <Icon name="clipboard-list" size={40} color="#ffc107" />
-            <Text style={styles.cardTitle}>Manage Audit Requests</Text>
-            <Text style={styles.cardDescription}>Access and process audit requests relevant to your role.</Text>
+            <Icon name="clipboard" size={40} color="#ffc107" />
+            <Text style={styles.cardTitle}>Cloud Empanelement Requests</Text>
+            <Text style={styles.cardDescription}>Access and process requests relevant to your role.</Text>
           </TouchableOpacity>
         )}
       </View>

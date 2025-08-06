@@ -3,10 +3,19 @@
 
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Linking } from 'react-native';
+import { Picker } from '@react-native-picker/picker'; // Corrected import for Picker
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../services/api';
 import { AuthContext } from '../../context/AuthContext';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import * as DocumentPicker from 'expo-document-picker';
+
+
+// For file picking, you will need to install and use a library like react-native-document-picker.
+// For example:
+// import DocumentPicker from 'react-native-document-picker';
+//
+// In this code, a placeholder function is used. You should replace it with your actual implementation.
 
 function AuditRequestDetailScreen({ route, navigation }) {
   const { auditRequestId } = route.params;
@@ -17,12 +26,19 @@ function AuditRequestDetailScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // State for Scientist F's status update form
+  const [newStatus, setNewStatus] = useState('');
+  const [certificateFile, setCertificateFile] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const fetchAuditRequestDetails = async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await api.get(`/audit-management/requests/${auditRequestId}/`);
       setAuditRequest(response.data);
+      // You can add a console log here to inspect the status
+      console.log('Fetched Audit Request Status:', response.data.status);
     } catch (err) {
       console.error('Error fetching audit request details:', err.response?.data || err.message);
       setError('Failed to load audit request details.');
@@ -63,6 +79,74 @@ function AuditRequestDetailScreen({ route, navigation }) {
       ],
       { cancelable: true }
     );
+  };
+
+  // Placeholder for file picker function
+ 
+
+
+  const handleCertificatePick = async () => {
+  try {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: 'application/pdf',
+      copyToCacheDirectory: true
+    });
+
+    if (result.type === 'success') {
+      setCertificateFile(result);
+      console.log('Selected file:', result);
+    } else {
+      console.log('File picking cancelled');
+    }
+  } catch (error) {
+    console.error('Error picking document:', error);
+  }
+};
+
+
+  const handleStatusUpdate = async () => {
+    if (!newStatus) {
+      Alert.alert('Validation Error', 'Please select a new status.');
+      return;
+    }
+
+    if (newStatus === 'Approved_by_ScientistF' && !certificateFile) {
+      Alert.alert('Validation Error', 'A certificate file is required to approve the request.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    const formData = new FormData();
+    formData.append('status', newStatus);
+
+    if (certificateFile) {
+      formData.append('certificate_of_empanelment', {
+        uri: certificateFile.uri,
+        name: certificateFile.name,
+        type: certificateFile.type,
+      });
+    }
+
+    try {
+      const response = await api.patch(
+        `/audit-management/requests/${auditRequestId}/status-update/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      Alert.alert('Success', 'Status updated successfully!');
+      setAuditRequest(response.data); // Update local state with new data
+      setNewStatus('');
+      setCertificateFile(null);
+    } catch (err) {
+      console.error('Error updating status:', err.response?.data || err.message);
+      Alert.alert('Error', 'Failed to update status. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -109,12 +193,29 @@ function AuditRequestDetailScreen({ route, navigation }) {
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.headerCard}>
-          <Text style={styles.headerTitle}>Audit Request #{auditRequest.id}</Text>
+          <Text style={styles.headerTitle}>Audit Request ID : {auditRequest.id}</Text>
           <Text style={styles.headerSubtitle}>CSP: {auditRequest.service_provider_name}</Text>
           <Text style={[styles.statusBadge, getStatusBadgeStyle(auditRequest.status)]}>
             {auditRequest.status_display}
           </Text>
         </View>
+
+        {/* --- CSP Certificate Download Section --- */}
+        {/* This section only appears for CSPs on an approved request */}
+        {user.role === 'CSP' && auditRequest.status === 'Approved_by_ScientistF' && auditRequest.certificate_of_empanelment && (
+          <View style={styles.infoSection}>
+            <Text style={styles.sectionTitle}><Icon name="trophy" size={18} /> Certificate of Empanelment</Text>
+            <Text style={styles.infoValue}>Your audit has been successfully approved. You can now download your certificate.</Text>
+            <TouchableOpacity
+              style={styles.downloadButton}
+              onPress={() => Linking.openURL(auditRequest.certificate_of_empanelment)}
+            >
+              <Icon name="download" size={20} color="#fff" />
+              <Text style={styles.downloadButtonText}>Download Certificate</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        {/* -------------------------------------- */}
 
         {/* Request Information */}
         <View style={styles.infoSection}>
@@ -143,7 +244,7 @@ function AuditRequestDetailScreen({ route, navigation }) {
 
         {/* Documents Section */}
         <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}><Icon name="file-alt" size={18} /> Documents</Text>
+          <Text style={styles.sectionTitle}><Icon name="file" size={18} /> Documents</Text>
           {auditRequest.documents.length > 0 ? (
             auditRequest.documents.map((doc) => (
               <View key={doc.id} style={styles.listItem}>
@@ -174,8 +275,9 @@ function AuditRequestDetailScreen({ route, navigation }) {
           )}
 
           {/* Document Upload Form Button (Conditional) */}
+          {/* This button appears for CSPs on their own request or STQC auditors on forwarded requests */}
           {(user.role === 'CSP' && user.id === auditRequest.csp.id) ||
-           (user.role === 'STQC_Auditor' && auditRequest.status === 'Forwarded_to_STQC') ? (
+            (user.role === 'STQC_Auditor' && auditRequest.status === 'Forwarded_to_STQC') ? (
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() => navigation.navigate('DocumentUpload', { auditRequestId: auditRequest.id })}
@@ -201,21 +303,95 @@ function AuditRequestDetailScreen({ route, navigation }) {
           )}
 
           {/* Add Remark Form Button (Conditional) */}
+          {/* This button appears for all users who can review/audit, regardless of the request status */}
           {(user.role === 'MeitY_Reviewer' || user.role === 'STQC_Auditor' || user.role === 'Scientist_F') ? (
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() => navigation.navigate('AddRemark', { auditRequestId: auditRequest.id })}
             >
-              <Icon name="comment-medical" size={20} color="#fff" />
+              <Icon name="plus" size={20} color="#fff" />
               <Text style={styles.actionButtonText}>Add a Remark</Text>
             </TouchableOpacity>
           ) : null}
         </View>
 
-        {/* Status Update Section (Conditional) */}
-        {((user.role === 'MeitY_Reviewer' && auditRequest.status === 'Submitted_by_CSP') ||
-          (user.role === 'STQC_Auditor' && auditRequest.status === 'Forwarded_to_STQC') ||
-          (user.role === 'Scientist_F' && auditRequest.status === 'Audit_Completed_by_STQC')) ? (
+        {/* --- Test Section to Debug Conditional Logic --- */}
+        {/* This section displays the exact values used in the conditional check. */}
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>Conditional Logic Debugger</Text>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoLabel}>User Role:</Text>
+            <Text style={styles.infoValue}>{user.role}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoLabel}>Audit Status:</Text>
+            <Text style={styles.infoValue}>{auditRequest.status}</Text>
+          </View>
+          <Text style={{ textAlign: 'center', marginVertical: 10, fontWeight: 'bold' }}>
+            Result: {user.role === 'ScientistF' && auditRequest.status === 'Audit_Completed_by_STQC' ? 'TRUE' : 'FALSE'}
+          </Text>
+        </View>
+
+        {/* --- Scientist F Status Update and Certificate Reward Section --- */}
+        {/* This section only appears when the role is ScientistF AND the status is 'Audit_Completed_by_STQC' */}
+        {user.role === 'Scientist_F' && auditRequest.status === 'Audit_Completed_by_STQC' && (
+          <View style={styles.infoSection}>
+            <Text style={styles.sectionTitle}><Icon name="certificate" size={18} /> Reward Certificate</Text>
+            <View style={styles.statusUpdateContainer}>
+              <Text style={styles.infoLabel}>Select Action:</Text>
+              <Picker
+                selectedValue={newStatus}
+                onValueChange={(itemValue) => {
+                  setNewStatus(itemValue);
+                  if (itemValue !== 'Approved_by_ScientistF') {
+                    setCertificateFile(null);
+                  }
+                }}
+                style={styles.picker}
+              >
+                <Picker.Item label="Select a status..." value="" />
+                <Picker.Item label="Approve Request" value="Approved_by_ScientistF" />
+                <Picker.Item label="Reject Request" value="Rejected_by_ScientistF" />
+              </Picker>
+            </View>
+
+            {newStatus === 'Approved_by_ScientistF' && (
+              <View style={styles.fileInputContainer}>
+                <Text style={styles.infoLabel}>Upload Certificate of Empanelment:</Text>
+                <TouchableOpacity
+                  style={styles.filePickerButton}
+                  onPress={handleCertificatePick}
+                >
+                  <Icon name="upload" size={16} color="#fff" />
+                  <Text style={styles.filePickerButtonText}>
+                    {certificateFile ? certificateFile.name : 'Select Certificate PDF'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={[styles.actionButton, isSubmitting && styles.disabledButton]}
+              onPress={handleStatusUpdate}
+              disabled={isSubmitting || !newStatus}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <>
+                  <Icon name="check-circle" size={20} color="#fff" />
+                  <Text style={styles.actionButtonText}>Submit Action</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
+        {/* ------------------------------------------------------------- */}
+
+        {/* Generic Status Update Button for other roles/statuses */}
+        {/* This is for MeitY Reviewer or STQC Auditor to change status */}
+        {(user.role === 'MeitY_Reviewer' && auditRequest.status === 'Submitted_by_CSP') ||
+          (user.role === 'STQC_Auditor' && auditRequest.status === 'Forwarded_to_STQC') ? (
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => navigation.navigate('UpdateStatus', { auditRequestId: auditRequest.id, currentStatus: auditRequest.status })}
@@ -223,11 +399,18 @@ function AuditRequestDetailScreen({ route, navigation }) {
             <Icon name="sync-alt" size={20} color="#fff" />
             <Text style={styles.actionButtonText}>Update Status</Text>
           </TouchableOpacity>
-        ) : (
+        ) : null}
+
+        {/* Workflow message for other statuses */}
+        {!(
+          (user.role === 'MeitY_Reviewer' && auditRequest.status === 'Submitted_by_CSP') ||
+          (user.role === 'STQC_Auditor' && auditRequest.status === 'Forwarded_to_STQC') ||
+          (user.role === 'ScientistF' && auditRequest.status === 'Audit_Completed_by_STQC')
+        ) && (
           <View style={[styles.workflowMessage, styles.workflowInfo]}>
             <Icon name="info-circle" size={20} color="#0a6b7e" />
             <Text style={styles.workflowMessageText}>
-              No action is currently available for your role on this request at its current status: {auditRequest.status_display}.
+              No action is currently available for your role on this request at its current status: {auditRequest.status_display}{user.role}.
             </Text>
           </View>
         )}
@@ -448,6 +631,58 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  downloadButton: {
+    flexDirection: 'row',
+    backgroundColor: '#28a745',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 15,
+    shadowColor: '#28a745',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  downloadButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  statusUpdateContainer: {
+    marginTop: 15,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginTop: 5,
+  },
+  fileInputContainer: {
+    marginTop: 15,
+  },
+  filePickerButton: {
+    flexDirection: 'row',
+    backgroundColor: '#17a2b8',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  filePickerButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    marginLeft: 10,
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
+    shadowColor: '#ccc',
   },
 });
 

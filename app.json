@@ -24,6 +24,18 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "437f8c40-4b25-4194-8e4b-3e5e3caf84a2"
+      }
+    },
+    "owner": "pranay9392363",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/437f8c40-4b25-4194-8e4b-3e5e3caf84a2"
     }
   }
 }

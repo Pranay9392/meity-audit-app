@@ -108,8 +108,8 @@ function UpdateStatusScreen({ route, navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        <Icon name="sync-alt" size={60} color="#007bff" style={styles.icon} />
-        <Text style={styles.title}>Update Status for Audit Request #{auditRequestId}</Text>
+        <Icon name="clipboard" size={60} color="#007bff" style={styles.icon} />
+        <Text style={styles.title}>Update Status for Audit Request :{auditRequestId}</Text>
         <Text style={styles.subtitle}>Current Status: <Text style={styles.currentStatusText}>{allStatusChoices[currentStatus] || currentStatus}</Text></Text>
 
         <View style={styles.inputGroup}>

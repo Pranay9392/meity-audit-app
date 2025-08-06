@@ -54,8 +54,8 @@ function AddRemarkScreen({ route, navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        <Icon name="comment-medical" size={60} color="#007bff" style={styles.icon} />
-        <Text style={styles.title}>Add Remark to Audit Request #{auditRequestId}</Text>
+        <Icon name="clipboard" size={60} color="#007bff" style={styles.icon} />
+        <Text style={styles.title}>Add Remark to Audit Request :{auditRequestId}</Text>
         <Text style={styles.subtitle}>Share your insights or updates regarding this request.</Text>
 
         <View style={styles.inputGroup}>
@@ -74,7 +74,7 @@ function AddRemarkScreen({ route, navigation }) {
             <ActivityIndicator color="#fff" />
           ) : (
             <>
-              <Icon name="plus-circle" size={20} color="#fff" style={styles.buttonIcon} />
+              <Icon name="" size={20} color="#fff" style={styles.buttonIcon} />
               <Text style={styles.buttonText}>Add Remark</Text>
             </>
           )}

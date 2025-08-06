@@ -31,7 +31,7 @@ function LoginScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Icon name="user-circle" size={80} color="#007bff" style={styles.icon} />
-      <Text style={styles.title}>Login to MeitY Audit Portal</Text>
+      <Text style={styles.title}>Cloud Empanelment Portal</Text>
       <View style={styles.inputGroup}>
         <Icon name="user" size={20} color="#555" style={styles.inputIcon} />
         <TextInput
